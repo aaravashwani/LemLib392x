@@ -157,10 +157,10 @@ void lemlib::Chassis::moveDistance(float dist, int timeout, MoveToPointParams pa
     const int compState = pros::competition::get_status();
     std::optional<bool> prevSide = std::nullopt;
 
-    Pose target(lastPose.x + dist * sin(lastPose.theta),
-                 lastPose.y + dist * cos(lastPose.theta));
+    Pose target(lastPose.x + dist * sin(degToRad(lastPose.theta)),
+                 lastPose.y + dist * cos(degToRad(lastPose.theta)));
     target.theta = lastPose.angle(target);
-    printf("Target: %f, %f", target.x, target.y);
+    printf("Target?: %f, %f", target.x, target.y);
 
     // main loop
     while (!timer.isDone() && ((!lateralSmallExit.getExit() && !lateralLargeExit.getExit()) || !close) &&
