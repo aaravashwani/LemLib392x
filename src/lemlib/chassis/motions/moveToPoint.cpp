@@ -234,7 +234,7 @@ void lemlib::Chassis::moveDistance(float dist, int timeout, MoveToPointParams pa
         // move the drivetrain
         drivetrain.leftMotors->move(leftPower);
         drivetrain.rightMotors->move(rightPower);
-        printf("\n %f", lateralOut);
+        printf("\n Error: %f, Output: %f", lateralError, lateralOut);
         // delay to save resources
         pros::delay(10);
     }
