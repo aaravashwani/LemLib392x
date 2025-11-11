@@ -316,6 +316,7 @@ struct MoveToPointParams {
         bool forwards = true;
         /** the maximum speed the robot can travel at. Value between 0-127. 127 by default */
         float maxSpeed = 127;
+        float maxAngularSpeed = 127;
         /** the minimum speed the robot can travel at. If set to a non-zero value, the exit conditions will switch to
          * less accurate but smoother ones. Value between 0-127. 0 by default */
         float minSpeed = 0;
