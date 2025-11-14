@@ -61,7 +61,7 @@ void lemlib::Chassis::moveToPose(float x, float y, float theta, int timeout, Mov
         // check if the robot is close enough to the target to start settling
         if (distTarget < 7.5 && close == false) {
             close = true;
-            params.maxSpeed = fmax(fabs(prevLateralOut), 60);
+            params.maxSpeed = fmax(fabs(prevLateralOut), 127);
         }
 
         // check if the lateral controller has settled
