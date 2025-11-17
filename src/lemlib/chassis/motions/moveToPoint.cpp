@@ -234,7 +234,6 @@ void lemlib::Chassis::moveDistance(float dist, int timeout, MoveToPointParams pa
         // move the drivetrain
         drivetrain.leftMotors->move(leftPower);
         drivetrain.rightMotors->move(rightPower);
-        printf("\n Error: %f, Output: %f", lateralError, lateralOut);
         // delay to save resources
         pros::delay(10);
     }
@@ -245,4 +244,6 @@ void lemlib::Chassis::moveDistance(float dist, int timeout, MoveToPointParams pa
     // set distTraveled to -1 to indicate that the function has finished
     distTraveled = -1;
     this->endMotion();
+
+    printf("\nX: %f, Y: %f, Theta: %f", getPose().x, getPose().y, getPose().theta);
 }

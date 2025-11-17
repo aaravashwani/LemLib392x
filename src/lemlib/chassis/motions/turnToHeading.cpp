@@ -1,11 +1,18 @@
 #include <cmath>
 #include "lemlib/chassis/chassis.hpp"
+#include "lemlib/exitcondition.hpp"
 #include "lemlib/logger/logger.hpp"
 #include "lemlib/timer.hpp"
 #include "lemlib/util.hpp"
 #include "pros/misc.hpp"
 
 void lemlib::Chassis::turnToHeading(float theta, int timeout, TurnToHeadingParams params, bool async) {
+    ExitCondition tempSmall = (fabs(angleError(theta, getPose().theta, false)) > 30) ? angularSmallExit : angularU30SmallExit;
+    ExitCondition tempLarge = (fabs(angleError(theta, getPose().theta, false)) > 30) ? angularLargeExit : angularU30LargeExit;
+    PID tempAngularPID = (fabs(angleError(theta, getPose().theta, false)) > 30) ? angularPID : angularU30PID;
+    ControllerSettings tempAngularSettings = (fabs(angleError(theta, getPose().theta, false)) > 30) ? angularSettings : angularU30Settings;
+
+
     params.minSpeed = std::abs(params.minSpeed);
     this->requestMotionStart();
     // were all motions cancelled?
@@ -28,12 +35,12 @@ void lemlib::Chassis::turnToHeading(float theta, int timeout, TurnToHeadingParam
     std::uint8_t compState = pros::competition::get_status();
     distTraveled = 0;
     Timer timer(timeout);
-    angularLargeExit.reset();
-    angularSmallExit.reset();
-    angularPID.reset();
+    tempLarge.reset();
+    tempSmall.reset();
+    tempAngularPID.reset();
 
     // main loop
-    while (!timer.isDone() && !angularLargeExit.getExit() && !angularSmallExit.getExit() && this->motionRunning) {
+    while (!timer.isDone() && !tempLarge.getExit() && !tempSmall.getExit() && this->motionRunning) {
         // update variables
         Pose pose = getPose();
 
@@ -58,14 +65,14 @@ void lemlib::Chassis::turnToHeading(float theta, int timeout, TurnToHeadingParam
         if (params.minSpeed != 0 && sgn(deltaTheta) != sgn(prevDeltaTheta)) break;
 
         // calculate the speed
-        motorPower = angularPID.update(deltaTheta);
-        angularLargeExit.update(deltaTheta);
-        angularSmallExit.update(deltaTheta);
+        motorPower = tempAngularPID.update(deltaTheta);
+        tempLarge.update(deltaTheta);
+        tempSmall.update(deltaTheta);
 
         // cap the speed
         if (motorPower > params.maxSpeed) motorPower = params.maxSpeed;
         else if (motorPower < -params.maxSpeed) motorPower = -params.maxSpeed;
-        if (fabs(deltaTheta) > 20) motorPower = slew(motorPower, prevMotorPower, angularSettings.slew);
+        if (fabs(deltaTheta) > 20) motorPower = slew(motorPower, prevMotorPower, tempAngularSettings.slew);
         if (motorPower < 0 && motorPower > -params.minSpeed) motorPower = -params.minSpeed;
         else if (motorPower > 0 && motorPower < params.minSpeed) motorPower = params.minSpeed;
         prevMotorPower = motorPower;
@@ -77,6 +84,7 @@ void lemlib::Chassis::turnToHeading(float theta, int timeout, TurnToHeadingParam
         drivetrain.rightMotors->move(-motorPower);
 
         pros::delay(10);
+        printf("\nTarget theta: %f\n", targetTheta);
     }
 
     // stop the drivetrain
@@ -85,4 +93,6 @@ void lemlib::Chassis::turnToHeading(float theta, int timeout, TurnToHeadingParam
     // set distTraveled to -1 to indicate that the function has finished
     distTraveled = -1;
     this->endMotion();
+
+    printf("\nX: %f, Y: %f, Theta: %f", getPose().x, getPose().y, getPose().theta);
 }

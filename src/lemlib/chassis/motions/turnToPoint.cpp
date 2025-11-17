@@ -6,6 +6,18 @@
 #include "pros/misc.hpp"
 
 void lemlib::Chassis::turnToPoint(float x, float y, int timeout, TurnToPointParams params, bool async) {
+     Pose pose = getPose();
+    pose.theta = (params.forwards) ? fmod(pose.theta, 360) : fmod(pose.theta - 180, 360);
+    float deltaX = x - pose.x;
+    float deltaY = y - pose.y;
+    float targetTheta = fmod(radToDeg(M_PI_2 - atan2(deltaY, deltaX)), 360);
+    float tempError =  fabs(angleError(targetTheta, pose.theta, false));
+    ExitCondition tempSmall = tempError ? angularSmallExit : angularU30SmallExit;
+    ExitCondition tempLarge = tempError > 30 ? angularLargeExit : angularU30LargeExit;
+    PID tempAngularPID = tempError ? angularPID : angularU30PID;
+    ControllerSettings tempAngularSettings = tempError > 30 ? angularSettings : angularU30Settings;
+
+
     params.minSpeed = std::abs(params.minSpeed);
     this->requestMotionStart();
     // were all motions cancelled?
@@ -17,8 +29,7 @@ void lemlib::Chassis::turnToPoint(float x, float y, int timeout, TurnToPointPara
         pros::delay(10); // delay to give the task time to start
         return;
     }
-    float targetTheta;
-    float deltaX, deltaY, deltaTheta;
+    float deltaTheta;
     float motorPower;
     float prevMotorPower = 0;
     float startTheta = getPose().theta;
@@ -28,12 +39,12 @@ void lemlib::Chassis::turnToPoint(float x, float y, int timeout, TurnToPointPara
     std::uint8_t compState = pros::competition::get_status();
     distTraveled = 0;
     Timer timer(timeout);
-    angularLargeExit.reset();
-    angularSmallExit.reset();
-    angularPID.reset();
+    tempLarge.reset();
+    tempSmall.reset();
+    tempAngularPID.reset();
 
     // main loop
-    while (!timer.isDone() && !angularLargeExit.getExit() && !angularSmallExit.getExit() && this->motionRunning) {
+    while (!timer.isDone() && !tempLarge.getExit() && !tempSmall.getExit() && this->motionRunning) {
         // update variables
         Pose pose = getPose();
         pose.theta = (params.forwards) ? fmod(pose.theta, 360) : fmod(pose.theta - 180, 360);
@@ -61,14 +72,14 @@ void lemlib::Chassis::turnToPoint(float x, float y, int timeout, TurnToPointPara
         if (params.minSpeed != 0 && sgn(deltaTheta) != sgn(prevDeltaTheta)) break;
 
         // calculate the speed
-        motorPower = angularPID.update(deltaTheta);
-        angularLargeExit.update(deltaTheta);
-        angularSmallExit.update(deltaTheta);
+        motorPower = tempAngularPID.update(deltaTheta);
+        tempLarge.update(deltaTheta);
+        tempSmall.update(deltaTheta);
 
         // cap the speed
         if (motorPower > params.maxSpeed) motorPower = params.maxSpeed;
         else if (motorPower < -params.maxSpeed) motorPower = -params.maxSpeed;
-        if (fabs(deltaTheta) > 20) motorPower = slew(motorPower, prevMotorPower, angularSettings.slew);
+        if (fabs(deltaTheta) > 20) motorPower = slew(motorPower, prevMotorPower, tempAngularSettings.slew);
         if (motorPower < 0 && motorPower > -params.minSpeed) motorPower = -params.minSpeed;
         else if (motorPower > 0 && motorPower < params.minSpeed) motorPower = params.minSpeed;
         prevMotorPower = motorPower;
@@ -80,6 +91,7 @@ void lemlib::Chassis::turnToPoint(float x, float y, int timeout, TurnToPointPara
         drivetrain.rightMotors->move(-motorPower);
 
         pros::delay(10);
+        printf("\nTarget theta: %f\n", targetTheta);
     }
 
     // stop the drivetrain
@@ -88,4 +100,6 @@ void lemlib::Chassis::turnToPoint(float x, float y, int timeout, TurnToPointPara
     // set distTraveled to -1 to indicate that the function has finished
     distTraveled = -1;
     this->endMotion();
+
+    printf("\nX: %f, Y: %f, Theta: %f", getPose().x, getPose().y, getPose().theta);
 }

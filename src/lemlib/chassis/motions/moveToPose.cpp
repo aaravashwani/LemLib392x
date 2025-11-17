@@ -158,4 +158,6 @@ void lemlib::Chassis::moveToPose(float x, float y, float theta, int timeout, Mov
     // set distTraveled to -1 to indicate that the function has finished
     distTraveled = -1;
     this->endMotion();
+
+    printf("\nX: %f, Y: %f, Theta: %f", getPose().x, getPose().y, getPose().theta);
 }
