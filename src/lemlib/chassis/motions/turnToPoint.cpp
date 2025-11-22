@@ -12,9 +12,9 @@ void lemlib::Chassis::turnToPoint(float x, float y, int timeout, TurnToPointPara
     float deltaY = y - pose.y;
     float targetTheta = fmod(radToDeg(M_PI_2 - atan2(deltaY, deltaX)), 360);
     float tempError =  fabs(angleError(targetTheta, pose.theta, false));
-    ExitCondition tempSmall = tempError ? angularSmallExit : angularU30SmallExit;
+    ExitCondition tempSmall = tempError > 30 ? angularSmallExit : angularU30SmallExit;
     ExitCondition tempLarge = tempError > 30 ? angularLargeExit : angularU30LargeExit;
-    PID tempAngularPID = tempError ? angularPID : angularU30PID;
+    PID tempAngularPID = tempError > 30 ? angularPID : angularU30PID;
     ControllerSettings tempAngularSettings = tempError > 30 ? angularSettings : angularU30Settings;
 
 
