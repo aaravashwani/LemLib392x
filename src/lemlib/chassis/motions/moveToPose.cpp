@@ -6,6 +6,18 @@
 #include "pros/misc.hpp"
 
 void lemlib::Chassis::moveToPose(float x, float y, float theta, int timeout, MoveToPoseParams params, bool async) {
+
+    Pose pose = getPose();
+    pose.theta = (params.forwards) ? fmod(pose.theta, 360) : fmod(pose.theta - 180, 360);
+    float deltaX = x - pose.x;
+    float deltaY = y - pose.y;
+    float targetTheta = fmod(radToDeg(M_PI_2 - atan2(deltaY, deltaX)), 360);
+    float tempError =  fabs(angleError(targetTheta, pose.theta, false));
+    ExitCondition tempSmall = tempError > 30 ? angularSmallExit : angularU30SmallExit;
+    ExitCondition tempLarge = tempError > 30 ? angularLargeExit : angularU30LargeExit;
+    PID tempAngularPID = tempError > 30 ? angularPID : angularU30PID;
+    ControllerSettings tempAngularSettings = tempError > 30 ? angularSettings : angularU30Settings;
+
     // take the mutex
     this->requestMotionStart();
     // were all motions cancelled?
@@ -22,9 +34,9 @@ void lemlib::Chassis::moveToPose(float x, float y, float theta, int timeout, Mov
     lateralPID.reset();
     lateralLargeExit.reset();
     lateralSmallExit.reset();
-    angularPID.reset();
-    angularLargeExit.reset();
-    angularSmallExit.reset();
+    tempAngularPID.reset();
+    tempLarge.reset();
+    tempSmall.reset();
 
     // calculate target pose in standard form
     Pose target(x, y, M_PI_2 - degToRad(theta));
@@ -46,7 +58,7 @@ void lemlib::Chassis::moveToPose(float x, float y, float theta, int timeout, Mov
 
     // main loop
     while (!timer.isDone() &&
-           ((!lateralSettled || (!angularLargeExit.getExit() && !angularSmallExit.getExit())) || !close) &&
+           ((!lateralSettled || (!tempLarge.getExit() && !tempSmall.getExit())) || !close) &&
            this->motionRunning) {
         // update position
         const Pose pose = getPose(true, true);
@@ -95,12 +107,12 @@ void lemlib::Chassis::moveToPose(float x, float y, float theta, int timeout, Mov
         // update exit conditions
         lateralSmallExit.update(lateralError);
         lateralLargeExit.update(lateralError);
-        angularSmallExit.update(radToDeg(angularError));
-        angularLargeExit.update(radToDeg(angularError));
+        tempSmall.update(radToDeg(angularError));
+        tempLarge.update(radToDeg(angularError));
 
         // get output from PIDs
         float lateralOut = lateralPID.update(lateralError);
-        float angularOut = angularPID.update(radToDeg(angularError));
+        float angularOut = tempAngularPID.update(radToDeg(angularError));
 
         // apply restrictions on angular speed
         angularOut = std::clamp(angularOut, -params.maxAngularSpeed, params.maxAngularSpeed);

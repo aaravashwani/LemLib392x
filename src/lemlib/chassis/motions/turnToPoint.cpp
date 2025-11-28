@@ -6,7 +6,7 @@
 #include "pros/misc.hpp"
 
 void lemlib::Chassis::turnToPoint(float x, float y, int timeout, TurnToPointParams params, bool async) {
-     Pose pose = getPose();
+    Pose pose = getPose();
     pose.theta = (params.forwards) ? fmod(pose.theta, 360) : fmod(pose.theta - 180, 360);
     float deltaX = x - pose.x;
     float deltaY = y - pose.y;

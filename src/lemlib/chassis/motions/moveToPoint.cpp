@@ -6,6 +6,18 @@
 #include "pros/misc.hpp"
 
 void lemlib::Chassis::moveToPoint(float x, float y, int timeout, MoveToPointParams params, bool async) {
+
+    Pose pose = getPose();
+    pose.theta = (params.forwards) ? fmod(pose.theta, 360) : fmod(pose.theta - 180, 360);
+    float deltaX = x - pose.x;
+    float deltaY = y - pose.y;
+    float targetTheta = fmod(radToDeg(M_PI_2 - atan2(deltaY, deltaX)), 360);
+    float tempError =  fabs(angleError(targetTheta, pose.theta, false));
+    ExitCondition tempSmall = tempError > 30 ? angularSmallExit : angularU30SmallExit;
+    ExitCondition tempLarge = tempError > 30 ? angularLargeExit : angularU30LargeExit;
+    PID tempAngularPID = tempError > 30 ? angularPID : angularU30PID;
+    ControllerSettings tempAngularSettings = tempError > 30 ? angularSettings : angularU30Settings;
+
     params.earlyExitRange = fabs(params.earlyExitRange);
     this->requestMotionStart();
     // were all motions cancelled?
@@ -22,7 +34,7 @@ void lemlib::Chassis::moveToPoint(float x, float y, int timeout, MoveToPointPara
     lateralPID.reset();
     lateralLargeExit.reset();
     lateralSmallExit.reset();
-    angularPID.reset();
+    tempAngularPID.reset();
 
     // initialize vars used between iterations
     Pose lastPose = getPose();
@@ -77,12 +89,12 @@ void lemlib::Chassis::moveToPoint(float x, float y, int timeout, MoveToPointPara
 
         // get output from PIDs
         float lateralOut = lateralPID.update(lateralError);
-        float angularOut = angularPID.update(radToDeg(angularError));
+        float angularOut = tempAngularPID.update(radToDeg(angularError));
         if (close) angularOut = 0;
 
         // apply restrictions on angular speed
         angularOut = std::clamp(angularOut, -params.maxAngularSpeed, params.maxAngularSpeed);
-        angularOut = slew(angularOut, prevAngularOut, angularSettings.slew);
+        angularOut = slew(angularOut, prevAngularOut, tempAngularSettings.slew);
 
         // apply restrictions on lateral speed
         lateralOut = std::clamp(lateralOut, -params.maxSpeed, params.maxSpeed);
