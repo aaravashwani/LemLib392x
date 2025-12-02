@@ -160,7 +160,7 @@ void lemlib::Chassis::moveDistance(float dist, int timeout, MoveToPointParams pa
     Pose target(lastPose.x + dist * sin(degToRad(lastPose.theta)),
                  lastPose.y + dist * cos(degToRad(lastPose.theta)));
     target.theta = lastPose.angle(target);
-    printf("Target?: %f, %f", target.x, target.y);
+    printf("\n Target?: %f, %f", target.x, target.y);
 
     // main loop
     while (!timer.isDone() && ((!lateralSmallExit.getExit() && !lateralLargeExit.getExit()) || !close) &&
