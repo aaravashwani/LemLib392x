@@ -84,7 +84,6 @@ void lemlib::Chassis::turnToHeading(float theta, int timeout, TurnToHeadingParam
         drivetrain.rightMotors->move(-motorPower);
 
         pros::delay(10);
-        printf("\nTarget theta: %f\n", targetTheta);
     }
 
     // stop the drivetrain
