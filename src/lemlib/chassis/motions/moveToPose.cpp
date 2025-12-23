@@ -6,6 +6,10 @@
 #include "pros/misc.hpp"
 
 void lemlib::Chassis::moveToPose(float x, float y, float theta, int timeout, MoveToPoseParams params, bool async) {
+    ExitCondition tempSmall = angularSmallExit;
+    ExitCondition tempLarge = angularLargeExit;
+    PID tempAngularPID = angularPID;
+    ControllerSettings tempAngularSettings = angularSettings;
 
     Pose pose = getPose();
     pose.theta = (params.forwards) ? fmod(pose.theta, 360) : fmod(pose.theta - 180, 360);
@@ -13,10 +17,12 @@ void lemlib::Chassis::moveToPose(float x, float y, float theta, int timeout, Mov
     float deltaY = y - pose.y;
     float targetTheta = fmod(radToDeg(M_PI_2 - atan2(deltaY, deltaX)), 360);
     float tempError =  fabs(angleError(targetTheta, pose.theta, false));
-    ExitCondition tempSmall = tempError > 30 ? angularSmallExit : angularU30SmallExit;
-    ExitCondition tempLarge = tempError > 30 ? angularLargeExit : angularU30LargeExit;
-    PID tempAngularPID = tempError > 30 ? angularPID : angularU30PID;
-    ControllerSettings tempAngularSettings = tempError > 30 ? angularSettings : angularU30Settings;
+    if(params.U30 && tempError < 30) {
+        ExitCondition tempSmall = angularU30SmallExit;
+        ExitCondition tempLarge = angularU30LargeExit;
+        PID tempAngularPID = angularU30PID;
+        ControllerSettings tempAngularSettings = angularU30Settings;
+    }
 
     // take the mutex
     this->requestMotionStart();

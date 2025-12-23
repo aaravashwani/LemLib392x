@@ -301,6 +301,8 @@ struct MoveToPoseParams {
         /** distance between the robot and target point where the movement will exit. Only has an effect if minSpeed is
          * non-zero.*/
         float earlyExitRange = 0;
+
+        bool U30 = true; /** use the angularU30 PID controller when within 30 degrees of the target heading */
 };
 
 /**
