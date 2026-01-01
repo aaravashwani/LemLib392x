@@ -77,7 +77,7 @@ void lemlib::Chassis::moveToPose(float x, float y, float theta, int timeout, Mov
         const float distTarget = pose.distance(target);
 
         // check if the robot is close enough to the target to start settling
-        if (distTarget < 7.5 && close == false) {
+        if (distTarget < 3 && close == false) {
             close = true;
             params.maxSpeed = fmax(fabs(prevLateralOut), 127);
         }
@@ -95,8 +95,8 @@ void lemlib::Chassis::moveToPose(float x, float y, float theta, int timeout, Mov
         const bool carrotSide = (carrot.y - target.y) * -sin(target.theta) <=
                                 (carrot.x - target.x) * cos(target.theta) + params.earlyExitRange;
         const bool sameSide = robotSide == carrotSide;
-        // exit if close
-        if (!sameSide && prevSameSide && close && params.minSpeed != 0) break;
+        // exit if close (only if angular has settled and within 2 inches of target)
+        if (!sameSide && prevSameSide && close && params.minSpeed != 0 && tempLarge.getExit() && tempSmall.getExit() && distTarget < 2) break;
         prevSameSide = sameSide;
 
         // calculate error
