@@ -253,9 +253,9 @@ void lemlib::Chassis::moveDistance(float dist, int timeout, MoveToPointParams pa
     // stop the drivetrain
     drivetrain.leftMotors->move(0);
     drivetrain.rightMotors->move(0);
+
+    printf("\nX: %f, Y: %f, Theta: %f", getPose().x, getPose().y, getPose().theta);
     // set distTraveled to -1 to indicate that the function has finished
     distTraveled = -1;
     this->endMotion();
-
-    printf("\nX: %f, Y: %f, Theta: %f", getPose().x, getPose().y, getPose().theta);
 }

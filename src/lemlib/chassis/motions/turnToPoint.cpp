@@ -1,4 +1,5 @@
 #include <cmath>
+#include <vector>
 #include "lemlib/chassis/chassis.hpp"
 #include "lemlib/logger/logger.hpp"
 #include "lemlib/timer.hpp"
@@ -11,11 +12,15 @@ void lemlib::Chassis::turnToPoint(float x, float y, int timeout, TurnToPointPara
     float deltaX = x - pose.x;
     float deltaY = y - pose.y;
     float targetTheta = fmod(radToDeg(M_PI_2 - atan2(deltaY, deltaX)), 360);
+    printf("\nTarget theta: %f\n", targetTheta);
     float tempError =  fabs(angleError(targetTheta, pose.theta, false));
+    std::pmr::vector<float> decidedConstants = tempError > 30 ? angularPID.decideConstants(tempError, customConstants) : angularU30PID.decideConstants(tempError, customConstants);
+    bool customPID = params.PIDConstants[0] != 0 || params.PIDConstants[1] != 0 || params.PIDConstants[2] != 0 || params.PIDConstants[3] != 0;
+    PID tempAngularPID = customPID ? PID(params.PIDConstants[0], params.PIDConstants[1], params.PIDConstants[2], params.PIDConstants[3], true) : (params.decidePID ? PID(decidedConstants[0], decidedConstants[1], decidedConstants[2], decidedConstants[3], true) : (tempError > 30 ? angularPID : angularU30PID));
     ExitCondition tempSmall = tempError > 30 ? angularSmallExit : angularU30SmallExit;
     ExitCondition tempLarge = tempError > 30 ? angularLargeExit : angularU30LargeExit;
-    PID tempAngularPID = tempError > 30 ? angularPID : angularU30PID;
     ControllerSettings tempAngularSettings = tempError > 30 ? angularSettings : angularU30Settings;
+
 
 
     params.minSpeed = std::abs(params.minSpeed);
@@ -91,15 +96,14 @@ void lemlib::Chassis::turnToPoint(float x, float y, int timeout, TurnToPointPara
         drivetrain.rightMotors->move(-motorPower);
 
         pros::delay(10);
-        printf("\nTarget theta: %f\n", targetTheta);
     }
 
     // stop the drivetrain
     drivetrain.leftMotors->move(0);
     drivetrain.rightMotors->move(0);
+    printf("\nTarget theta final: %f\n", targetTheta);
+    printf("\nX: %f, Y: %f, Theta: %f", getPose().x, getPose().y, getPose().theta);
     // set distTraveled to -1 to indicate that the function has finished
     distTraveled = -1;
     this->endMotion();
-
-    printf("\nX: %f, Y: %f, Theta: %f", getPose().x, getPose().y, getPose().theta);
 }

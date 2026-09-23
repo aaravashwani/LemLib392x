@@ -1,4 +1,6 @@
 #include <math.h>
+#include <unordered_map>
+#include <vector>
 #include "pros/imu.hpp"
 #include "pros/motors.h"
 #include "pros/rtos.h"
@@ -28,7 +30,7 @@ lemlib::Drivetrain::Drivetrain(pros::MotorGroup* leftMotors, pros::MotorGroup* r
 
 
 lemlib::Chassis::Chassis(Drivetrain drivetrain, ControllerSettings linearSettings, ControllerSettings angularSettings, ControllerSettings angularU30Settings,
-                         OdomSensors sensors, DriveCurve* throttleCurve, DriveCurve* steerCurve)
+                         OdomSensors sensors, DriveCurve* throttleCurve, DriveCurve* steerCurve, std::pmr::unordered_map<float, std::pmr::vector<float>> customConstants)
     : drivetrain(drivetrain),
       lateralSettings(linearSettings),
       angularSettings(angularSettings),
@@ -44,7 +46,8 @@ lemlib::Chassis::Chassis(Drivetrain drivetrain, ControllerSettings linearSetting
       angularLargeExit(angularSettings.largeError, angularSettings.largeErrorTimeout),
       angularSmallExit(angularSettings.smallError, angularSettings.smallErrorTimeout),
       angularU30SmallExit(angularU30Settings.smallError, angularU30Settings.smallErrorTimeout),
-      angularU30LargeExit(angularU30Settings.largeError, angularU30Settings.largeErrorTimeout) {}
+      angularU30LargeExit(angularU30Settings.largeError, angularU30Settings.largeErrorTimeout),
+      customConstants(customConstants) {}
 
 /**
  * @brief calibrate the IMU given a sensors struct

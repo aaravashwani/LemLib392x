@@ -1,3 +1,5 @@
+#include <vector>
+#include <unordered_map>
 #pragma once
 
 namespace lemlib {
@@ -42,6 +44,18 @@ class PID {
          * @endcode
          */
         float update(float error);
+
+
+        /**
+         * @brief Decide which constants to use
+         *
+         * @param error target minus position - AKA error
+         * @param customConstants a map of error thresholds to constants. If error is above a threshold, the corresponding constants will be used. If error is between two thresholds, the constants will be linearly interpolated. If this map is empty, the default constants will be used.
+         * @return vector of pid constants
+         *
+         * 
+         */
+        std::pmr::vector<float> decideConstants(float error, std::pmr::unordered_map<float, std::pmr::vector<float>>& customConstants);
 
         /**
          * @brief reset integral, derivative, and prevTime
