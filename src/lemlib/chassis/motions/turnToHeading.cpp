@@ -8,12 +8,12 @@
 
 void lemlib::Chassis::turnToHeading(float theta, int timeout, TurnToHeadingParams params, bool async) {
     float tempError =  fabs(angleError(theta, getPose().theta, false));
-    std::pmr::vector<float> decidedConstants = tempError > 30 ? angularPID.decideConstants(tempError, customConstants) : angularU30PID.decideConstants(tempError, customConstants);
+    std::pmr::vector<float> decidedConstants = tempError > 40 ? angularPID.decideConstants(tempError, customConstants) : angularU40PID.decideConstants(tempError, customConstants);
     bool customPID = params.PIDConstants[0] != 0 || params.PIDConstants[1] != 0 || params.PIDConstants[2] != 0 || params.PIDConstants[3] != 0;
-    PID tempAngularPID = customPID ? PID(params.PIDConstants[0], params.PIDConstants[1], params.PIDConstants[2], params.PIDConstants[3], true) : (params.decidePID ? PID(decidedConstants[0], decidedConstants[1], decidedConstants[2], decidedConstants[3], true) : (tempError > 30 ? angularPID : angularU30PID));
-    ExitCondition tempSmall = tempError > 30 ? angularSmallExit : angularU30SmallExit;
-    ExitCondition tempLarge = tempError > 30 ? angularLargeExit : angularU30LargeExit;
-    ControllerSettings tempAngularSettings = tempError > 30 ? angularSettings : angularU30Settings;
+    PID tempAngularPID = customPID ? PID(params.PIDConstants[0], params.PIDConstants[1], params.PIDConstants[2], params.PIDConstants[3], true) : (params.decidePID ? PID(decidedConstants[0], decidedConstants[1], decidedConstants[2], decidedConstants[3], true) : (tempError > 40 ? angularPID : angularU40PID));
+    ExitCondition tempSmall = tempError > 40 ? angularSmallExit : angularU40SmallExit;
+    ExitCondition tempLarge = tempError > 40 ? angularLargeExit : angularU40LargeExit;
+    ControllerSettings tempAngularSettings = tempError > 40 ? angularSettings : angularU40Settings;
 
     params.minSpeed = std::abs(params.minSpeed);
     this->requestMotionStart();

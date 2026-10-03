@@ -19,11 +19,11 @@ void lemlib::Chassis::moveToPose(float x, float y, float theta, int timeout, Mov
     float deltaY = y - pose.y;
     float targetTheta = fmod(radToDeg(M_PI_2 - atan2(deltaY, deltaX)), 360);
     float tempError =  fabs(angleError(targetTheta, pose.theta, false));
-    if(params.U30 && tempError < 30) {
-        ExitCondition tempSmall = angularU30SmallExit;
-        ExitCondition tempLarge = angularU30LargeExit;
-        PID tempAngularPID = angularU30PID;
-        ControllerSettings tempAngularSettings = angularU30Settings;
+    if(params.U40 && tempError < 40) {
+        ExitCondition tempSmall = angularU40SmallExit;
+        ExitCondition tempLarge = angularU40LargeExit;
+        PID tempAngularPID = angularU40PID;
+        ControllerSettings tempAngularSettings = angularU40Settings;
     }
 
     // take the mutex

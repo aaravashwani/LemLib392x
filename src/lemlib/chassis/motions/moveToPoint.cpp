@@ -13,10 +13,10 @@ void lemlib::Chassis::moveToPoint(float x, float y, int timeout, MoveToPointPara
     float deltaY = y - pose.y;
     float targetTheta = fmod(radToDeg(M_PI_2 - atan2(deltaY, deltaX)), 360);
     float tempError =  fabs(angleError(targetTheta, pose.theta, false));
-    ExitCondition tempSmall = tempError > 30 ? angularSmallExit : angularU30SmallExit;
-    ExitCondition tempLarge = tempError > 30 ? angularLargeExit : angularU30LargeExit;
-    PID tempAngularPID = tempError > 30 ? angularPID : angularU30PID;
-    ControllerSettings tempAngularSettings = tempError > 30 ? angularSettings : angularU30Settings;
+    ExitCondition tempSmall = tempError > 40 ? angularSmallExit : angularU40SmallExit;
+    ExitCondition tempLarge = tempError > 40 ? angularLargeExit : angularU40LargeExit;
+    PID tempAngularPID = tempError > 40 ? angularPID : angularU40PID;
+    ControllerSettings tempAngularSettings = tempError > 40 ? angularSettings : angularU40Settings;
 
     params.earlyExitRange = fabs(params.earlyExitRange);
     this->requestMotionStart();
@@ -137,6 +137,7 @@ void lemlib::Chassis::moveToPoint(float x, float y, int timeout, MoveToPointPara
     // stop the drivetrain
     drivetrain.leftMotors->move(0);
     drivetrain.rightMotors->move(0);
+    printf("\nX: %f, Y: %f, Theta: %f", getPose().x, getPose().y, getPose().theta);
     // set distTraveled to -1 to indicate that the function has finished
     distTraveled = -1;
     this->endMotion();

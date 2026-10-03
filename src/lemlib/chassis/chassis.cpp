@@ -29,24 +29,24 @@ lemlib::Drivetrain::Drivetrain(pros::MotorGroup* leftMotors, pros::MotorGroup* r
       horizontalDrift(horizontalDrift) {}
 
 
-lemlib::Chassis::Chassis(Drivetrain drivetrain, ControllerSettings linearSettings, ControllerSettings angularSettings, ControllerSettings angularU30Settings,
+lemlib::Chassis::Chassis(Drivetrain drivetrain, ControllerSettings linearSettings, ControllerSettings angularSettings, ControllerSettings angularU40Settings,
                          OdomSensors sensors, DriveCurve* throttleCurve, DriveCurve* steerCurve, std::pmr::unordered_map<float, std::pmr::vector<float>> customConstants)
     : drivetrain(drivetrain),
       lateralSettings(linearSettings),
       angularSettings(angularSettings),
-      angularU30Settings(angularU30Settings),
+      angularU40Settings(angularU40Settings),
       sensors(sensors),
       throttleCurve(throttleCurve),
       steerCurve(steerCurve),
       lateralPID(linearSettings.kP, linearSettings.kI, linearSettings.kD, linearSettings.windupRange, true),
       angularPID(angularSettings.kP, angularSettings.kI, angularSettings.kD, angularSettings.windupRange, true),
-      angularU30PID(angularU30Settings.kP, angularU30Settings.kI, angularU30Settings.kD, angularU30Settings.windupRange, true),
+      angularU40PID(angularU40Settings.kP, angularU40Settings.kI, angularU40Settings.kD, angularU40Settings.windupRange, true),
       lateralLargeExit(lateralSettings.largeError, lateralSettings.largeErrorTimeout),
       lateralSmallExit(lateralSettings.smallError, lateralSettings.smallErrorTimeout),
       angularLargeExit(angularSettings.largeError, angularSettings.largeErrorTimeout),
       angularSmallExit(angularSettings.smallError, angularSettings.smallErrorTimeout),
-      angularU30SmallExit(angularU30Settings.smallError, angularU30Settings.smallErrorTimeout),
-      angularU30LargeExit(angularU30Settings.largeError, angularU30Settings.largeErrorTimeout),
+      angularU40SmallExit(angularU40Settings.smallError, angularU40Settings.smallErrorTimeout),
+      angularU40LargeExit(angularU40Settings.largeError, angularU40Settings.largeErrorTimeout),
       customConstants(customConstants) {}
 
 /**

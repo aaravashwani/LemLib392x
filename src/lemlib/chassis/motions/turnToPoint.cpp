@@ -14,12 +14,12 @@ void lemlib::Chassis::turnToPoint(float x, float y, int timeout, TurnToPointPara
     float targetTheta = fmod(radToDeg(M_PI_2 - atan2(deltaY, deltaX)), 360);
     printf("\nTarget theta: %f\n", targetTheta);
     float tempError =  fabs(angleError(targetTheta, pose.theta, false));
-    std::pmr::vector<float> decidedConstants = tempError > 30 ? angularPID.decideConstants(tempError, customConstants) : angularU30PID.decideConstants(tempError, customConstants);
+    std::pmr::vector<float> decidedConstants = tempError > 40 ? angularPID.decideConstants(tempError, customConstants) : angularU40PID.decideConstants(tempError, customConstants);
     bool customPID = params.PIDConstants[0] != 0 || params.PIDConstants[1] != 0 || params.PIDConstants[2] != 0 || params.PIDConstants[3] != 0;
-    PID tempAngularPID = customPID ? PID(params.PIDConstants[0], params.PIDConstants[1], params.PIDConstants[2], params.PIDConstants[3], true) : (params.decidePID ? PID(decidedConstants[0], decidedConstants[1], decidedConstants[2], decidedConstants[3], true) : (tempError > 30 ? angularPID : angularU30PID));
-    ExitCondition tempSmall = tempError > 30 ? angularSmallExit : angularU30SmallExit;
-    ExitCondition tempLarge = tempError > 30 ? angularLargeExit : angularU30LargeExit;
-    ControllerSettings tempAngularSettings = tempError > 30 ? angularSettings : angularU30Settings;
+    PID tempAngularPID = customPID ? PID(params.PIDConstants[0], params.PIDConstants[1], params.PIDConstants[2], params.PIDConstants[3], true) : (params.decidePID ? PID(decidedConstants[0], decidedConstants[1], decidedConstants[2], decidedConstants[3], true) : (tempError > 40 ? angularPID : angularU40PID));
+    ExitCondition tempSmall = tempError > 40 ? angularSmallExit : angularU40SmallExit;
+    ExitCondition tempLarge = tempError > 40 ? angularLargeExit : angularU40LargeExit;
+    ControllerSettings tempAngularSettings = tempError > 40 ? angularSettings : angularU40Settings;
 
 
 
