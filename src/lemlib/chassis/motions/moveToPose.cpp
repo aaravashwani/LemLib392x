@@ -24,7 +24,9 @@ void lemlib::Chassis::moveToPose(float x, float y, float theta, int timeout, Mov
         ExitCondition tempLarge = angularU40LargeExit;
         PID tempAngularPID = angularU40PID;
         ControllerSettings tempAngularSettings = angularU40Settings;
+
     }
+    tempAngularSettings.kI = 0;
 
     // take the mutex
     this->requestMotionStart();
@@ -81,7 +83,7 @@ void lemlib::Chassis::moveToPose(float x, float y, float theta, int timeout, Mov
         // check if the robot is close enough to the target to start settling
         if (distTarget < 3 && close == false) {
             close = true;
-            params.maxSpeed = fmax(fabs(prevLateralOut), 127);
+            params.maxAngularSpeed = fmax(fabs(prevLateralOut), 30);
         }
 
         // check if the lateral controller has settled
@@ -172,6 +174,7 @@ void lemlib::Chassis::moveToPose(float x, float y, float theta, int timeout, Mov
         pros::delay(10);
     }
 
+    int time_passed = timer.getTimePassed();
     // stop the drivetrain
     drivetrain.leftMotors->move(0);
     drivetrain.rightMotors->move(0);
@@ -179,5 +182,6 @@ void lemlib::Chassis::moveToPose(float x, float y, float theta, int timeout, Mov
     distTraveled = -1;
     this->endMotion();
 
+    printf("\nMove To Pose time: %f, timeout: %f", time_passed, timeout);
     printf("\nX: %f, Y: %f, Theta: %f", getPose().x, getPose().y, getPose().theta);
 }
