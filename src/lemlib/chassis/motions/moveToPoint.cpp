@@ -138,7 +138,7 @@ void lemlib::Chassis::moveToPoint(float x, float y, int timeout, MoveToPointPara
     // stop the drivetrain
     drivetrain.leftMotors->move(0);
     drivetrain.rightMotors->move(0);
-    printf("\nMove To Point time: %f, timeout: %f", time_passed, timeout);
+    printf("\n\nMove To Point time: %i, timeout: %i", time_passed, timeout);
     printf("\nX: %f, Y: %f, Theta: %f", getPose().x, getPose().y, getPose().theta);
     // set distTraveled to -1 to indicate that the function has finished
     distTraveled = -1;
@@ -175,7 +175,7 @@ void lemlib::Chassis::moveDistance(float dist, int timeout, MoveToPointParams pa
     Pose target(lastPose.x + dist * sin(degToRad(lastPose.theta)),
                  lastPose.y + dist * cos(degToRad(lastPose.theta)));
     target.theta = lastPose.angle(target);
-    printf("\n Target?: %f, %f", target.x, target.y);
+    printf("\n\n Target?: %f, %f", target.x, target.y);
 
     // main loop
     while (!timer.isDone() && ((!lateralSmallExit.getExit() && !lateralLargeExit.getExit()) || !close) &&
@@ -258,7 +258,7 @@ void lemlib::Chassis::moveDistance(float dist, int timeout, MoveToPointParams pa
     drivetrain.leftMotors->move(0);
     drivetrain.rightMotors->move(0);
 
-    printf("\nMove Distance: %f, timeout: %f", time_passed, timeout);
+    printf("\nMove Distance: %i, timeout: %i", time_passed, timeout);
     printf("\nX: %f, Y: %f, Theta: %f", getPose().x, getPose().y, getPose().theta);
     // set distTraveled to -1 to indicate that the function has finished
     distTraveled = -1;

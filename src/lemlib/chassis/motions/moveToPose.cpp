@@ -182,6 +182,6 @@ void lemlib::Chassis::moveToPose(float x, float y, float theta, int timeout, Mov
     distTraveled = -1;
     this->endMotion();
 
-    printf("\nMove To Pose time: %f, timeout: %f", time_passed, timeout);
+    printf("\n\nMove To Pose time: %i, timeout: %i", time_passed, timeout);
     printf("\nX: %f, Y: %f, Theta: %f", getPose().x, getPose().y, getPose().theta);
 }

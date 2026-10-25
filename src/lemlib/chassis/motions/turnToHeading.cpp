@@ -95,6 +95,6 @@ void lemlib::Chassis::turnToHeading(float theta, int timeout, TurnToHeadingParam
     // set distTraveled to -1 to indicate that the function has finished
     distTraveled = -1;
     this->endMotion();
-    printf("\nTurn to Heading time: %f, timeout: %f", time_passed, timeout);
+    printf("\n\nTurn to Heading time: %i, timeout: %i", time_passed, timeout);
     printf("\nX: %f, Y: %f, Theta: %f", getPose().x, getPose().y, getPose().theta);
 }

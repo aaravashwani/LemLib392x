@@ -102,8 +102,8 @@ void lemlib::Chassis::turnToPoint(float x, float y, int timeout, TurnToPointPara
     // stop the drivetrain
     drivetrain.leftMotors->move(0);
     drivetrain.rightMotors->move(0);
-    printf("\nTurn to point time: %f, timeout: %f", time_passed, timeout);
-    printf("\nTarget theta final: %f\n", targetTheta);
+    printf("\n\nTurn to point time: %i, timeout: %i", time_passed, timeout);
+    printf("\nTarget theta final: %f", targetTheta);
     printf("\nX: %f, Y: %f, Theta: %f", getPose().x, getPose().y, getPose().theta);
     // set distTraveled to -1 to indicate that the function has finished
     distTraveled = -1;
